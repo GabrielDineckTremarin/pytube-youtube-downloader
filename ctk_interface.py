@@ -170,7 +170,10 @@ class App(ctk.CTk):
         return new_path
     
 
-
+    def change_extension_to_mp3(self, file):
+        base, ext = os.path.splitext(file)
+        new_file = base + '.mp3'
+        os.rename(file, new_file)
 
 
 
