@@ -1,154 +1,124 @@
-
+import tkinter as tk
 from datetime import date
-from tkinter import *
-from tkinter import messagebox, filedialog
-from pytube import YouTube, Playlist
+import customtkinter as ctk
 import os
-
-
-
-FG_COLOR = "#2068F7"
-ACTIVE_BG_RADIOS = "#ffc16c"
-BG_COLOR = '#ffce89'
-BTN_COLOR = "#2068F7"
-ACTIVE_BG_BTN = '#2045F7'
+from pytube import YouTube, Playlist
 
 
 
 
-class App(Tk):
+ctk.set_appearance_mode("System")  
+ctk.set_default_color_theme("blue")
+
+class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        self.download_options = ['Download an audio', 'Download a video', 'Download an audio playlist', 'Download a video playlist']
         self.initial_dir = self.get_initial_dir()
-
-
-        self.resizable(False, False)
-        self.center_window(750,300)
-
-        self.title("YouTube Downloader")
-        self.config(background=BG_COLOR)
-
-        self.download_url = StringVar(master=self)
-        self.download_path = StringVar(master=self)
+        self.download_url = ctk.StringVar(master=self)
+        self.download_path = ctk.StringVar(master=self)
         self.download_path.set(self.initial_dir)
+        self.choosen_download_option = ''
+        self.labels_font_cfg = ctk.CTkFont(size=15, weight="normal")
+       
 
-        self.media_option = IntVar(master=self)
 
-   
+        # self.geometry(f"{750}x{300}")
+        self.center_window(750,300)
+        self.title("Youtube Downloader")
+        self.resizable(False,False)
 
-        self.link_label = Label(self,
-                                text="URL: ",
-                                bg=BG_COLOR)
+
+        # setting up 6x4 grid system
+        self.grid_config()
+
+
+
+        # creating the widgets
+
+
+        self.title_label = ctk.CTkLabel(master=self,
+                                        text="Youtube Downloader",
+                                        font= ctk.CTkFont(size=30, weight="normal"),
+                                        )
         
-        self.link_label.grid(row=1,column=0,pady=10,padx=1)
 
 
+        self.url_label = ctk.CTkLabel(master=self,
+                                        text="Url: ",
+                                        font= self.labels_font_cfg
+                                        )
 
-        self.url_entry = Entry(self,
-                               highlightthickness=0,
-                               width=60,
-                               textvariable=self.download_url)
-        
-        self.url_entry.grid(row=1,column=1,pady=5,padx=5)
-
-
-        
-        self.clear_btn = Button(self,
-                                activebackground=ACTIVE_BG_BTN,
-                                highlightthickness=0,
-                                text="Clear",
-                                command=self.clear_url_entry,
-                                width=10,
-                                bg=BTN_COLOR)
-
-        self.clear_btn.grid(row=1,column=2,pady=1,padx=1)
 
     
-
-        self.destination_label = Label(self,
-                                       text="Destination: ",
-                                       bg=BG_COLOR)
+        self.url_entry = ctk.CTkEntry(master=self,
+                                width=400,
+                               height=30,
+                               border_width=2,
+                               corner_radius=10,
+                                textvariable=self.download_url
+                               )
         
-        self.destination_label.grid(row=2,column=0,pady=5,padx=5)
 
-
-
-        self.destination_text = Entry(self,
-                                      highlightthickness=0,
-                                      width=60,
-                                      textvariable=self.download_path)
+        self.clear_btn = ctk.CTkButton(master=self,
+                                        height=30,
+                                       text="Clear",
+                                       command=self.clear_url_entry)
         
-        self.destination_text.grid(row=2,column=1,pady=5,padx=5)    
 
-        self.browse_btn = Button(self,
-                                 activebackground=ACTIVE_BG_BTN,
-                                 highlightthickness=0,
-                                 text="Browse",
-                                 command=self.browse,
-                                 width=10,
-                                 bg=BTN_COLOR)
+
+
+
+        self.path_label = ctk.CTkLabel(master=self,
+                                text="Destination: ",
+                                font= self.labels_font_cfg)
+
         
-        self.browse_btn.grid(row=2,column=2,pady=1,padx=1)
 
-
-
-        self.audio_option = Radiobutton(self,
-                                        activebackground=ACTIVE_BG_RADIOS,
-                                        highlightthickness=0,
-                                        text="Download audio",
-                                        variable=self.media_option,
-                                        value=0,
-                                        bg=BG_COLOR)
         
-        self.audio_option.grid(row=3,column=1,sticky='w',pady=10,padx=10)
-
-
-
-        self.video_option = Radiobutton(self,
-                                        activebackground=ACTIVE_BG_RADIOS,
-                                        highlightthickness=0,
-                                        text="Download video",
-                                        variable=self.media_option,
-                                        value=1, bg=BG_COLOR)
+        self.path_entry = ctk.CTkEntry(master=self,
+                                width=400,
+                               height=30,
+                               placeholder_text='url goes here',
+                               border_width=2,
+                               corner_radius=10,
+                               textvariable=self.download_path)
         
-        self.video_option.grid(row=4,column=1,sticky='w',pady=10,padx=10)
+
+        self.browse_btn = ctk.CTkButton(master=self,
+                                height=30,
+                                text="Browse",
+                                command=self.browse)
 
 
+        self.select_options = ctk.CTkOptionMenu(master=self,
+                                        width=195,
+                                       values=self.download_options,
+                                       command=self.set_download_option
+                                       )
+        self.select_options.set('Select an option')
 
-        self.playlist_audio_option = Radiobutton(self,
-                                                 activebackground=ACTIVE_BG_RADIOS,
-                                                 highlightthickness=0,
-                                                 text="Download an audio playlist",
-                                                 variable=self.media_option,
-                                                 value=2,
-                                                 bg=BG_COLOR)
+
         
-        self.playlist_audio_option.grid(row=5,column=1,sticky='w',pady=10,padx=10)
+        self.download_btn = ctk.CTkButton(master=self,
+                                         height=30,
+                                        text="Download",
+                                        width=195,
+                                        command=self.download)
 
 
 
-        self.playlist_video_option = Radiobutton(self,
-                                                 activebackground=ACTIVE_BG_RADIOS,
-                                                 highlightthickness=0,
-                                                 text="Download a video playlist",
-                                                 variable=self.media_option,
-                                                 value=3,
-                                                 bg=BG_COLOR)
-        
-        self.playlist_video_option.grid(row=6,column=1,sticky='w',pady=10,padx=10)
-
-
-
-        self.download_btn = Button(self,
-                                   activebackground=ACTIVE_BG_BTN,
-                                   highlightthickness=0, text="Download",
-                                   width=10, bg=BTN_COLOR,
-                                   command=self.download)
-        
-        self.download_btn.grid(row=7,column=1,pady=4,padx=4)
-
-    
+        #putting the widgets in the frame
+        self.title_label.grid(row=0, column=0,columnspan=4)
+        self.url_label.grid(row=2, column=0, sticky='e')
+        self.url_entry.grid(row=2, column=1, columnspan=2)
+        self.clear_btn.grid(row=2, column=3, sticky='w')
+        self.path_label.grid(row=3,column=0, sticky='e')
+        self.path_entry.grid(row=3,column=1, columnspan=2)
+        self.browse_btn.grid(row=3, column=3, sticky='w')
+        self.select_options.grid(row=4,column=1, sticky='e', padx=5)
+        self.download_btn.grid(row=4, column=2, sticky='w', padx=5)
 
 
     def center_window(self, width, height):
@@ -159,34 +129,73 @@ class App(Tk):
         self.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
 
+    def grid_config(self):
+        self.grid_rowconfigure((0,1,2,3,4), weight=1)
+        self.grid_rowconfigure(5, weight=3)
+        self.grid_columnconfigure((0,1,2,3), weight=1)
+
+
+
     def clear_url_entry(self):
         self.download_url.set('')
 
 
 
-
     def browse(self):
-        download_dir = filedialog.askdirectory(initialdir=self.initial_dir)
+        download_dir = ctk.filedialog.askdirectory(initialdir=self.initial_dir)
         self.download_path.set(download_dir)
 
 
-    def download(self):
-        pass
+
+
+    def get_initial_dir(self):
+        if os.name == 'nt':
+            import winreg
+            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+                location = winreg.QueryValueEx(key, downloads_guid)[0]
+            return location
+        else:
+            return os.path.join(os.path.expanduser('~'), 'Downloads')
         
-        if self.media_option.get() == 0:
+
+
+    def set_download_option(self, choice):
+        self.choosen_download_option = choice
+
+
+
+    def playlists_download_dir(self, playlist_title):
+        folder_name = str(playlist_title).replace(" ", "_")
+        today = str(date.today())
+        new_path = f'{self.download_path.get()}/{folder_name}_{today}/'
+        os.system(f'mkdir {new_path}')
+        return new_path
+    
+
+    def change_extension_to_mp3(self, file):
+        base, ext = os.path.splitext(file)
+        new_file = base + '.mp3'
+        os.rename(file, new_file)
+
+
+
+    def download(self):
+        if self.choosen_download_option == self.download_options[0]:
             self.download_audio()
 
-        elif self.media_option.get() == 1:
+        elif self.choosen_download_option == self.download_options[1]:
             self.download_video()
 
-        elif self.media_option.get() == 2:
+        elif self.choosen_download_option == self.download_options[2]:
             self.download_audio_playlist()
 
-        elif self.media_option.get() == 3:
+        elif self.choosen_download_option == self.download_options[3]:
             self.download_video_playlist()
 
         else:
-            print("Erro")
+            self.show_info("Error!", "Select an option")
 
 
     def download_video(self):
@@ -197,10 +206,10 @@ class App(Tk):
 
             video = YouTube(url)
             video.streams.get_highest_resolution().download(output_path=folder)
-            messagebox.showinfo("Success!", "Download finished, your video is at "+folder)
+            self.show_info("Success!", "Download finished, your video is at "+folder)
         
         except:
-            messagebox.showinfo("Error!", "Error downloading your video")  
+            self.show_info("Error!", "Error downloading your video")  
 
 
     def download_audio(self):
@@ -212,11 +221,11 @@ class App(Tk):
             audio = YouTube(url)
             file = audio.streams.get_audio_only().download(output_path=folder)
             self.change_extension_to_mp3(file)
-            messagebox.showinfo("Success!", "Download finished, your audio is at "+folder)
+            self.show_info("Success!", "Download finished, your audio is at "+folder)
             
         
         except:
-            messagebox.showinfo("Error!", "Error downloading your audio")  
+            self.show_info("Error!", "Error downloading your audio")  
             
 
     def download_video_playlist(self):
@@ -233,11 +242,11 @@ class App(Tk):
                 except:
                     pass
 
-            messagebox.showinfo("Success!", "Download finished, your playlist is at "+folder)
+            self.show_info("Success!", "Download finished, your playlist is at "+folder)
 
 
         except:
-            messagebox.showinfo("Error!", "Error downloading your playlist")
+            self.show_info("Error!", "Error downloading your playlist")
 
 
 
@@ -259,50 +268,26 @@ class App(Tk):
                 except:
                     pass
 
-            messagebox.showinfo("Success!", "Download finished, your playlist is at "+folder)
+            self.show_info("Success!", "Download finished, your playlist is at "+folder)
+            
 
 
         except:
-            messagebox.showinfo("Error!", "Error downloading your playlist")
+            self.show_info("Error!", "Error downloading your playlist")
+            # ctk.messagebox.showinfo("Error!", "Error downloading your playlist")
 
 
 
-
-    def change_extension_to_mp3(self, file):
-        base, ext = os.path.splitext(file)
-        new_file = base + '.mp3'
-        os.rename(file, new_file)
+    def show_info(self, msg1, msg2):
+        tk.messagebox.showinfo(msg1, msg2)
+        
 
 
-    def get_initial_dir(self):
-        if os.name == 'nt':
-            import winreg
-            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
-            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-                location = winreg.QueryValueEx(key, downloads_guid)[0]
-            return location
-        else:
-            return os.path.join(os.path.expanduser('~'), 'Downloads')
-
-
-
-    def playlists_download_dir(self, playlist_title):
-        folder_name = str(playlist_title).replace(" ", "_")
-        today = str(date.today())
-        new_path = f'{self.download_path.get()}/{folder_name}_{today}/'
-        os.system(f'mkdir {new_path}')
-        return new_path
-    
-
-
-
-
-
+        
+        
 
 
 
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
