@@ -1,1 +1,0 @@
-pyinstaller -w --onedir --add-data /home/gabriel/.local/lib/python3.10/site-packages/customtkinter:customtkinter -n YoutubeDownloader main.py
