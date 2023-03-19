@@ -12,7 +12,7 @@ This program downloads videos and audios from YouTube, it uses Pytube to get the
 
 <ul>
   <li>
-    <a href="https://www.mediafire.com/file/vjdwy3igp39vchf/YoutubeDownloader/file">Download for Linux</a>
+    <a href="https://www.mediafire.com/file/n5z514gbqzf2fju/YoutubeDownloader/file">Download for Linux</a>
   </li>
 
   <li>

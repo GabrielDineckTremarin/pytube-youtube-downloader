@@ -14,7 +14,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        #self.iconbitmap("icon.ico") doesnt work for linux
+        #self.iconbitmap("icon.ico") doesn't work for linux
 
         self.download_options = ['Download an audio', 'Download a video', 'Download an audio playlist', 'Download a video playlist']
         self.initial_dir = self.get_initial_dir()
